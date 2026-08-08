@@ -38,7 +38,9 @@ export default defineComponent({
 
     return () => {
       const d = dimensaoPlaceholder()
-      const style = `display:inline-flex;line-height:0;width:${d};height:${d}`
+      // Só a versão redonda tem caixa quadrada; a original é 4x3 e define a
+      // altura pela proporção, senão o desenho achata.
+      const style = props.redonda ? `display:inline-flex;line-height:0;width:${d};height:${d}` : `display:inline-flex;line-height:0;width:${d}`
 
       if (!svg.value) {
         return h('span', {

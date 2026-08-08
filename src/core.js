@@ -17,10 +17,15 @@ function montarSvg(svg, opcoes) {
   const dimensao = tamanho == null ? '1em' : typeof tamanho === 'number' || /^\d+$/.test(String(tamanho)) ? `${tamanho}px` : String(tamanho)
 
   const classes = className ? `edusites-bandeira ${className}` : 'edusites-bandeira'
-  const arredondamento = redonda ? 'border-radius:50%;' : ''
-  const estilo = `width:${dimensao};height:${dimensao};${arredondamento}object-fit:cover;display:inline-block;vertical-align:middle`
 
-  return svg.replace(/^<svg/, `<svg class="${classes}" style="${estilo}" preserveAspectRatio="xMidYMid slice"`)
+  // Redonda: recorta um círculo do centro, então precisa de caixa quadrada + cover.
+  // Original: as bandeiras são 4x3, então só a largura é fixada — forçar quadrado
+  // aqui achataria o desenho.
+  const caixa = redonda ? `width:${dimensao};height:${dimensao};border-radius:50%;object-fit:cover` : `width:${dimensao};height:auto`
+
+  const proporcao = redonda ? ' preserveAspectRatio="xMidYMid slice"' : ''
+
+  return svg.replace(/^<svg/, `<svg class="${classes}" style="${caixa};display:inline-block;vertical-align:middle"${proporcao}`)
 }
 
 export function svgPais(opcoes) {

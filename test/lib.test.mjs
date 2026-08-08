@@ -65,6 +65,13 @@ const svgRedonda = await lib.svgPaisAsync({ nome: 'BR', redonda: true })
 teste('redonda aplica border-radius', svgRedonda.includes('border-radius:50%'), true)
 teste('não-redonda não aplica border-radius', svgBr.includes('border-radius'), false)
 
+// Bandeiras são 4x3: forçar caixa quadrada só faz sentido na redonda (que
+// recorta um círculo). Na original, altura automática ou o desenho achata.
+teste('redonda usa caixa quadrada', svgRedonda.includes('width:24px;height:24px') || svgRedonda.includes('width:1em;height:1em'), true)
+teste('redonda recorta com slice', svgRedonda.includes('xMidYMid slice'), true)
+teste('original preserva a proporção', svg24.includes('width:24px;height:auto'), true)
+teste('original não força slice', svg24.includes('xMidYMid slice'), false)
+
 const svgClasse = await lib.svgPaisAsync({ nome: 'BR', className: 'minha-classe' })
 teste('className extra é concatenado', svgClasse.includes('class="edusites-bandeira minha-classe"'), true)
 
