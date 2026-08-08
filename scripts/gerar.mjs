@@ -1,5 +1,8 @@
-// Regenera src/resolvedor.js a partir dos módulos em src/bandeiras/
-// e confere a cobertura contra src/paises.js.
+// Regenera src/bandeiras.js (monolítico do servidor) e src/isos.js a partir dos
+// módulos em src/bandeiras/, e confere a cobertura contra src/paises.js.
+//
+// O resolvedor (src/resolvedor.js) é escrito à mão — usa import.meta.glob e não
+// precisa de geração.
 //
 //   node scripts/gerar.mjs
 //
@@ -53,12 +56,21 @@ if (semBandeira.length) console.log(`⚠️  países sem bandeira: ${semBandeira
 if (semPais.length) console.log(`⚠️  bandeiras sem país: ${semPais.join(', ')}`)
 if (!semBandeira.length && !semPais.length) console.log('✓ cobertura completa')
 
-// --- resolvedor: mapa estático de imports dinâmicos
-const entradas = modulos.map((iso) => `  '${iso}': () => import('./bandeiras/${iso}.js')`)
+// --- monolítico do servidor: carregado só no SSR, nunca no bundle do cliente
+const entradas = modulos.map((iso) => {
+  const svg = JSON.parse(fs.readFileSync(path.join(DIR_MODULOS, `${iso}.js`), 'utf8').replace(/^export default /, '').trim())
+  return `  '${iso}': ${JSON.stringify(svg)}`
+})
 
 fs.writeFileSync(
-  path.join(RAIZ, 'src/resolvedor.js'),
-  `// Gerado automaticamente — mapa de import dinâmico por ISO alpha-2.\n// Cada bandeira é um chunk próprio: o bundler não inclui nenhuma sem ser pedida.\n\nexport const RESOLVEDORES = {\n${entradas.join(',\n')}\n}\n\nexport const ISOS = Object.keys(RESOLVEDORES)\n\nexport default RESOLVEDORES\n`
+  path.join(RAIZ, 'src/bandeiras.js'),
+  `// Gerado automaticamente — todas as bandeiras num objeto só.\n// Carregado APENAS no servidor (import dinâmico), para que o SSR resolva de\n// forma síncrona. No cliente cada bandeira vem do seu próprio chunk lazy.\n\nexport const BANDEIRAS = {\n${entradas.join(',\n')}\n}\n\nexport default BANDEIRAS\n`
 )
 
-console.log(`✓ resolvedor gerado com ${modulos.length} bandeiras`)
+// --- lista de ISOs disponíveis (leve, pode ir para o cliente)
+fs.writeFileSync(
+  path.join(RAIZ, 'src/isos.js'),
+  `// Gerado automaticamente — códigos ISO alpha-2 com bandeira disponível.\n\nexport const ISOS = ${JSON.stringify(modulos)}\n\nexport default ISOS\n`
+)
+
+console.log(`✓ bandeiras.js e isos.js gerados com ${modulos.length} bandeiras`)

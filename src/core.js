@@ -1,7 +1,8 @@
 import { PAISES } from './paises.js'
-import { RESOLVEDORES } from './resolvedor.js'
+import { ISOS } from './isos.js'
+import { resolverBrutoSync, resolverBrutoAsync, precarregarBrutos } from './resolvedor.js'
 
-const CACHE = new Map()
+const DISPONIVEIS = new Set(ISOS)
 
 function normalizarIso(codigo) {
   const iso = String(codigo == null ? '' : codigo)
@@ -28,7 +29,7 @@ export function svgPais(opcoes) {
   const iso = normalizarIso(nome)
   if (!iso) return null
 
-  const svg = CACHE.get(iso)
+  const svg = resolverBrutoSync(iso)
   if (!svg) return null
 
   return montarSvg(svg, { tamanho, redonda, className })
@@ -40,7 +41,7 @@ export async function svgPaisAsync(opcoes) {
   const iso = normalizarIso(nome)
   if (!iso) return null
 
-  const svg = await resolverBruto(iso)
+  const svg = await resolverBrutoAsync(iso)
   if (!svg) return null
 
   return montarSvg(svg, { tamanho, redonda, className })
@@ -49,27 +50,21 @@ export async function svgPaisAsync(opcoes) {
 export async function resolverBruto(codigo) {
   const iso = normalizarIso(codigo)
   if (!iso) return null
-  if (CACHE.has(iso)) return CACHE.get(iso)
-
-  const resolvedor = RESOLVEDORES[iso]
-  if (!resolvedor) return null
-
-  const modulo = await resolvedor()
-  const svg = modulo.default || null
-  if (svg) CACHE.set(iso, svg)
-  return svg
+  return resolverBrutoAsync(iso)
 }
 
 export async function precarregar(codigos) {
-  const lista = Array.isArray(codigos) ? codigos : Object.keys(RESOLVEDORES)
-  await Promise.all(lista.map((codigo) => resolverBruto(codigo)))
-  return CACHE.size
+  const lista = (Array.isArray(codigos) ? codigos : ISOS).map(normalizarIso).filter(Boolean)
+  await precarregarBrutos(lista)
+  return lista.length
 }
 
 export function temPais(codigo) {
   const iso = normalizarIso(codigo)
-  return Boolean(iso) && iso in RESOLVEDORES
+  return Boolean(iso) && DISPONIVEIS.has(iso)
 }
+
+export { ISOS }
 
 export function listarPaises() {
   return PAISES.map((pais) => ({ ...pais }))

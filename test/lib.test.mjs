@@ -41,7 +41,9 @@ lista[0].nome = 'ALTERADO'
 teste('listarPaises devolve cópia defensiva', lib.listarPaises()[0].nome !== 'ALTERADO', true)
 
 // --- svgPais sob demanda
-teste('svgPais antes do cache', lib.svgPais('BR'), null)
+// Em Node (e no SSR) o monolítico já está em memória, então a versão síncrona
+// resolve de primeira — é o que faz a bandeira sair no HTML do servidor.
+teste('svgPais resolve síncrono no servidor', lib.svgPais('BR').startsWith('<svg'), true)
 teste('svgPais código inválido', lib.svgPais('XX'), null)
 teste('svgPaisAsync inexistente', await lib.svgPaisAsync('XX'), null)
 teste('svgPaisAsync null', await lib.svgPaisAsync(null), null)
@@ -50,7 +52,7 @@ const svgBr = await lib.svgPaisAsync('BR')
 teste('svgPaisAsync devolve SVG', svgBr.startsWith('<svg'), true)
 teste('svgPaisAsync aplica classe', svgBr.includes('class="edusites-bandeira"'), true)
 teste('tamanho padrão é 1em', svgBr.includes('width:1em'), true)
-teste('svgPais depois do cache', lib.svgPais('BR') !== null, true)
+teste('svgPais consistente após async', lib.svgPais('BR') !== null, true)
 teste('aceita string direto', (await lib.svgPaisAsync('br')).startsWith('<svg'), true)
 
 const svg24 = await lib.svgPaisAsync({ nome: 'BR', tamanho: 24 })

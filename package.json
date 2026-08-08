@@ -40,7 +40,9 @@
   "main": "./src/index.js",
   "module": "./src/index.js",
   "type": "module",
-  "sideEffects": false,
+  "sideEffects": [
+    "./src/resolvedor.js"
+  ],
   "exports": {
     ".": "./src/index.js",
     "./nuxt": "./src/nuxt.js",
@@ -52,7 +54,9 @@
     "src/index.js",
     "src/core.js",
     "src/paises.js",
+    "src/isos.js",
     "src/resolvedor.js",
+    "src/bandeiras.js",
     "src/bandeiras",
     "src/SvgPais.js",
     "src/nuxt.js",

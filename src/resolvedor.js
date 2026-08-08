@@ -1,205 +1,122 @@
-// Gerado automaticamente — mapa de import dinâmico por ISO alpha-2.
-// Cada bandeira é um chunk próprio: o bundler não inclui nenhuma sem ser pedida.
+// Resolvedor de SVG bruto — mesma arquitetura de 3 camadas do @edusites/icons,
+// que dá tree-shaking no cliente SEM quebrar a renderização no SSR.
+//
+// O dilema: com `<SvgPais nome="BR">` (nome dinâmico em runtime) é impossível ter,
+// ao mesmo tempo, (a) resolução síncrona, (b) tree-shaking e (c) nome dinâmico —
+// o bundler não sabe o código em build-time. A saída é separar por ambiente:
+//
+// - SERVIDOR (SSR/Node): o peso não vai pro cliente, então carregamos todas as
+//   bandeiras do objeto monolítico e resolvemos SÍNCRONO. A bandeira entra no
+//   HTML do SSR em vez de aparecer só depois da hidratação.
+//
+// - CLIENTE: `import.meta.glob` LAZY — cada bandeira é um chunk separado, baixado
+//   sob demanda. Só as que aparecem entram no bundle. As já resolvidas no SSR
+//   chegam quentes no cache; as demais carregam sob demanda.
 
-export const RESOLVEDORES = {
-  'ad': () => import('./bandeiras/ad.js'),
-  'ae': () => import('./bandeiras/ae.js'),
-  'af': () => import('./bandeiras/af.js'),
-  'al': () => import('./bandeiras/al.js'),
-  'am': () => import('./bandeiras/am.js'),
-  'ao': () => import('./bandeiras/ao.js'),
-  'ar': () => import('./bandeiras/ar.js'),
-  'at': () => import('./bandeiras/at.js'),
-  'au': () => import('./bandeiras/au.js'),
-  'az': () => import('./bandeiras/az.js'),
-  'ba': () => import('./bandeiras/ba.js'),
-  'bb': () => import('./bandeiras/bb.js'),
-  'bd': () => import('./bandeiras/bd.js'),
-  'be': () => import('./bandeiras/be.js'),
-  'bf': () => import('./bandeiras/bf.js'),
-  'bg': () => import('./bandeiras/bg.js'),
-  'bi': () => import('./bandeiras/bi.js'),
-  'bj': () => import('./bandeiras/bj.js'),
-  'bn': () => import('./bandeiras/bn.js'),
-  'bo': () => import('./bandeiras/bo.js'),
-  'br': () => import('./bandeiras/br.js'),
-  'bs': () => import('./bandeiras/bs.js'),
-  'bt': () => import('./bandeiras/bt.js'),
-  'bw': () => import('./bandeiras/bw.js'),
-  'by': () => import('./bandeiras/by.js'),
-  'bz': () => import('./bandeiras/bz.js'),
-  'ca': () => import('./bandeiras/ca.js'),
-  'cd': () => import('./bandeiras/cd.js'),
-  'cf': () => import('./bandeiras/cf.js'),
-  'cg': () => import('./bandeiras/cg.js'),
-  'ch': () => import('./bandeiras/ch.js'),
-  'ci': () => import('./bandeiras/ci.js'),
-  'cl': () => import('./bandeiras/cl.js'),
-  'cm': () => import('./bandeiras/cm.js'),
-  'cn': () => import('./bandeiras/cn.js'),
-  'co': () => import('./bandeiras/co.js'),
-  'cr': () => import('./bandeiras/cr.js'),
-  'cu': () => import('./bandeiras/cu.js'),
-  'cv': () => import('./bandeiras/cv.js'),
-  'cy': () => import('./bandeiras/cy.js'),
-  'cz': () => import('./bandeiras/cz.js'),
-  'de': () => import('./bandeiras/de.js'),
-  'dj': () => import('./bandeiras/dj.js'),
-  'dk': () => import('./bandeiras/dk.js'),
-  'dm': () => import('./bandeiras/dm.js'),
-  'do': () => import('./bandeiras/do.js'),
-  'dz': () => import('./bandeiras/dz.js'),
-  'ec': () => import('./bandeiras/ec.js'),
-  'ee': () => import('./bandeiras/ee.js'),
-  'eg': () => import('./bandeiras/eg.js'),
-  'er': () => import('./bandeiras/er.js'),
-  'es': () => import('./bandeiras/es.js'),
-  'et': () => import('./bandeiras/et.js'),
-  'fi': () => import('./bandeiras/fi.js'),
-  'fj': () => import('./bandeiras/fj.js'),
-  'fm': () => import('./bandeiras/fm.js'),
-  'fr': () => import('./bandeiras/fr.js'),
-  'ga': () => import('./bandeiras/ga.js'),
-  'gb': () => import('./bandeiras/gb.js'),
-  'gd': () => import('./bandeiras/gd.js'),
-  'ge': () => import('./bandeiras/ge.js'),
-  'gh': () => import('./bandeiras/gh.js'),
-  'gm': () => import('./bandeiras/gm.js'),
-  'gn': () => import('./bandeiras/gn.js'),
-  'gq': () => import('./bandeiras/gq.js'),
-  'gr': () => import('./bandeiras/gr.js'),
-  'gt': () => import('./bandeiras/gt.js'),
-  'gw': () => import('./bandeiras/gw.js'),
-  'gy': () => import('./bandeiras/gy.js'),
-  'hk': () => import('./bandeiras/hk.js'),
-  'hn': () => import('./bandeiras/hn.js'),
-  'hr': () => import('./bandeiras/hr.js'),
-  'ht': () => import('./bandeiras/ht.js'),
-  'hu': () => import('./bandeiras/hu.js'),
-  'id': () => import('./bandeiras/id.js'),
-  'ie': () => import('./bandeiras/ie.js'),
-  'il': () => import('./bandeiras/il.js'),
-  'in': () => import('./bandeiras/in.js'),
-  'iq': () => import('./bandeiras/iq.js'),
-  'ir': () => import('./bandeiras/ir.js'),
-  'is': () => import('./bandeiras/is.js'),
-  'it': () => import('./bandeiras/it.js'),
-  'jm': () => import('./bandeiras/jm.js'),
-  'jo': () => import('./bandeiras/jo.js'),
-  'jp': () => import('./bandeiras/jp.js'),
-  'ke': () => import('./bandeiras/ke.js'),
-  'kg': () => import('./bandeiras/kg.js'),
-  'kh': () => import('./bandeiras/kh.js'),
-  'km': () => import('./bandeiras/km.js'),
-  'kn': () => import('./bandeiras/kn.js'),
-  'kp': () => import('./bandeiras/kp.js'),
-  'kr': () => import('./bandeiras/kr.js'),
-  'kw': () => import('./bandeiras/kw.js'),
-  'kz': () => import('./bandeiras/kz.js'),
-  'la': () => import('./bandeiras/la.js'),
-  'lb': () => import('./bandeiras/lb.js'),
-  'lc': () => import('./bandeiras/lc.js'),
-  'li': () => import('./bandeiras/li.js'),
-  'lk': () => import('./bandeiras/lk.js'),
-  'lr': () => import('./bandeiras/lr.js'),
-  'ls': () => import('./bandeiras/ls.js'),
-  'lt': () => import('./bandeiras/lt.js'),
-  'lu': () => import('./bandeiras/lu.js'),
-  'lv': () => import('./bandeiras/lv.js'),
-  'ly': () => import('./bandeiras/ly.js'),
-  'ma': () => import('./bandeiras/ma.js'),
-  'mc': () => import('./bandeiras/mc.js'),
-  'md': () => import('./bandeiras/md.js'),
-  'me': () => import('./bandeiras/me.js'),
-  'mg': () => import('./bandeiras/mg.js'),
-  'mh': () => import('./bandeiras/mh.js'),
-  'mk': () => import('./bandeiras/mk.js'),
-  'ml': () => import('./bandeiras/ml.js'),
-  'mm': () => import('./bandeiras/mm.js'),
-  'mn': () => import('./bandeiras/mn.js'),
-  'mo': () => import('./bandeiras/mo.js'),
-  'mr': () => import('./bandeiras/mr.js'),
-  'mt': () => import('./bandeiras/mt.js'),
-  'mu': () => import('./bandeiras/mu.js'),
-  'mv': () => import('./bandeiras/mv.js'),
-  'mw': () => import('./bandeiras/mw.js'),
-  'mx': () => import('./bandeiras/mx.js'),
-  'my': () => import('./bandeiras/my.js'),
-  'mz': () => import('./bandeiras/mz.js'),
-  'na': () => import('./bandeiras/na.js'),
-  'ne': () => import('./bandeiras/ne.js'),
-  'ng': () => import('./bandeiras/ng.js'),
-  'ni': () => import('./bandeiras/ni.js'),
-  'nl': () => import('./bandeiras/nl.js'),
-  'no': () => import('./bandeiras/no.js'),
-  'np': () => import('./bandeiras/np.js'),
-  'nr': () => import('./bandeiras/nr.js'),
-  'nz': () => import('./bandeiras/nz.js'),
-  'om': () => import('./bandeiras/om.js'),
-  'pa': () => import('./bandeiras/pa.js'),
-  'pe': () => import('./bandeiras/pe.js'),
-  'pg': () => import('./bandeiras/pg.js'),
-  'ph': () => import('./bandeiras/ph.js'),
-  'pk': () => import('./bandeiras/pk.js'),
-  'pl': () => import('./bandeiras/pl.js'),
-  'pr': () => import('./bandeiras/pr.js'),
-  'ps': () => import('./bandeiras/ps.js'),
-  'pt': () => import('./bandeiras/pt.js'),
-  'pw': () => import('./bandeiras/pw.js'),
-  'py': () => import('./bandeiras/py.js'),
-  'qa': () => import('./bandeiras/qa.js'),
-  'ro': () => import('./bandeiras/ro.js'),
-  'rs': () => import('./bandeiras/rs.js'),
-  'ru': () => import('./bandeiras/ru.js'),
-  'rw': () => import('./bandeiras/rw.js'),
-  'sa': () => import('./bandeiras/sa.js'),
-  'sb': () => import('./bandeiras/sb.js'),
-  'sc': () => import('./bandeiras/sc.js'),
-  'sd': () => import('./bandeiras/sd.js'),
-  'se': () => import('./bandeiras/se.js'),
-  'sg': () => import('./bandeiras/sg.js'),
-  'si': () => import('./bandeiras/si.js'),
-  'sk': () => import('./bandeiras/sk.js'),
-  'sl': () => import('./bandeiras/sl.js'),
-  'sm': () => import('./bandeiras/sm.js'),
-  'sn': () => import('./bandeiras/sn.js'),
-  'so': () => import('./bandeiras/so.js'),
-  'sr': () => import('./bandeiras/sr.js'),
-  'ss': () => import('./bandeiras/ss.js'),
-  'st': () => import('./bandeiras/st.js'),
-  'sv': () => import('./bandeiras/sv.js'),
-  'sy': () => import('./bandeiras/sy.js'),
-  'sz': () => import('./bandeiras/sz.js'),
-  'td': () => import('./bandeiras/td.js'),
-  'tg': () => import('./bandeiras/tg.js'),
-  'th': () => import('./bandeiras/th.js'),
-  'tj': () => import('./bandeiras/tj.js'),
-  'tl': () => import('./bandeiras/tl.js'),
-  'tm': () => import('./bandeiras/tm.js'),
-  'tn': () => import('./bandeiras/tn.js'),
-  'to': () => import('./bandeiras/to.js'),
-  'tr': () => import('./bandeiras/tr.js'),
-  'tt': () => import('./bandeiras/tt.js'),
-  'tv': () => import('./bandeiras/tv.js'),
-  'tw': () => import('./bandeiras/tw.js'),
-  'tz': () => import('./bandeiras/tz.js'),
-  'ua': () => import('./bandeiras/ua.js'),
-  'ug': () => import('./bandeiras/ug.js'),
-  'us': () => import('./bandeiras/us.js'),
-  'uy': () => import('./bandeiras/uy.js'),
-  'uz': () => import('./bandeiras/uz.js'),
-  'va': () => import('./bandeiras/va.js'),
-  'vc': () => import('./bandeiras/vc.js'),
-  've': () => import('./bandeiras/ve.js'),
-  'vn': () => import('./bandeiras/vn.js'),
-  'vu': () => import('./bandeiras/vu.js'),
-  'ws': () => import('./bandeiras/ws.js'),
-  'ye': () => import('./bandeiras/ye.js'),
-  'za': () => import('./bandeiras/za.js'),
-  'zm': () => import('./bandeiras/zm.js'),
-  'zw': () => import('./bandeiras/zw.js')
+// ---- Detecção de ambiente ----
+function ehServidor() {
+  try {
+    if (typeof import.meta !== 'undefined' && typeof import.meta.server !== 'undefined') {
+      return import.meta.server
+    }
+  } catch {
+    /* noop */
+  }
+  return typeof window === 'undefined'
 }
 
-export const ISOS = Object.keys(RESOLVEDORES)
+// ---- Glob lazy (só resolvido pelo Vite; null fora dele) ----
+let GLOB = null
+try {
+  if (typeof import.meta !== 'undefined' && typeof import.meta.glob === 'function') {
+    GLOB = import.meta.glob('./bandeiras/*.js')
+  }
+} catch {
+  GLOB = null
+}
 
-export default RESOLVEDORES
+const CACHE_BRUTO = new Map()
+
+// ---- Monolítico (server bundle / fallback sem-Vite) ----
+// Import DINÂMICO, então nunca entra no bundle do cliente Vite.
+let monoliticoSync = null
+let promessaMono = null
+
+function carregarMonoAsync() {
+  if (monoliticoSync) return Promise.resolve(monoliticoSync)
+  if (!promessaMono) {
+    promessaMono = import('./bandeiras.js').then((mod) => {
+      monoliticoSync = mod.BANDEIRAS
+      return monoliticoSync
+    })
+  }
+  return promessaMono
+}
+
+// No servidor, carrega bloqueante com top-level await para que a resolução
+// síncrona funcione já na primeira chamada — sem custo algum para o cliente.
+if (ehServidor()) {
+  try {
+    await carregarMonoAsync()
+  } catch {
+    /* segue com fallback async */
+  }
+}
+
+function chaveGlob(iso) {
+  return `./bandeiras/${iso}.js`
+}
+
+export function temGlob() {
+  return GLOB !== null
+}
+
+// ---- Resolução assíncrona (caminho universal) ----
+export async function resolverBrutoAsync(iso) {
+  if (CACHE_BRUTO.has(iso)) return CACHE_BRUTO.get(iso)
+
+  let bruto = null
+
+  if (ehServidor() || !GLOB) {
+    const bandeiras = await carregarMonoAsync()
+    bruto = (bandeiras && bandeiras[iso]) || null
+  } else {
+    const carregar = GLOB[chaveGlob(iso)]
+    if (carregar) {
+      const mod = await carregar()
+      bruto = (mod && mod.default) || null
+    }
+  }
+
+  CACHE_BRUTO.set(iso, bruto)
+  return bruto
+}
+
+// ---- Resolução síncrona ----
+// Servidor: resolve de verdade a partir do monolítico já em memória.
+// Cliente: devolve do cache (quente via SSR) ou null, disparando o load async.
+export function resolverBrutoSync(iso) {
+  if (CACHE_BRUTO.has(iso)) return CACHE_BRUTO.get(iso)
+
+  if (monoliticoSync) {
+    const bruto = monoliticoSync[iso] || null
+    CACHE_BRUTO.set(iso, bruto)
+    return bruto
+  }
+
+  resolverBrutoAsync(iso).catch(() => {})
+  return null
+}
+
+export async function precarregarBrutos(isos) {
+  const lista = Array.isArray(isos) ? isos : [isos]
+  await Promise.all(lista.map((iso) => resolverBrutoAsync(iso)))
+}
+
+// Semeia o cache a partir de dados externos (ex: payload de hidratação).
+export function semear(mapa) {
+  if (!mapa) return
+  for (const iso of Object.keys(mapa)) {
+    if (!CACHE_BRUTO.has(iso)) CACHE_BRUTO.set(iso, mapa[iso])
+  }
+}
