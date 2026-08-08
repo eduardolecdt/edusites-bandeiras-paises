@@ -15,78 +15,86 @@ function teste(nome, real, esperado) {
   console.log(`✗ ${nome}\n    obtido:   ${JSON.stringify(real)}\n    esperado: ${JSON.stringify(esperado)}`)
 }
 
-// --- urlBandeira
-teste('urlBandeira maiúsculo', lib.urlBandeira('BR'), '/bandeiras/br.svg')
-teste('urlBandeira minúsculo', lib.urlBandeira('br'), '/bandeiras/br.svg')
-teste('urlBandeira com espaços', lib.urlBandeira(' BR '), '/bandeiras/br.svg')
-teste('urlBandeira país inexistente', lib.urlBandeira('xx'), '')
-teste('urlBandeira string vazia', lib.urlBandeira(''), '')
-teste('urlBandeira null', lib.urlBandeira(null), '')
-teste('urlBandeira undefined', lib.urlBandeira(undefined), '')
-teste('urlBandeira número', lib.urlBandeira(55), '')
-teste('default export é urlBandeira', lib.default('BR'), '/bandeiras/br.svg')
-
-// --- base customizada
-lib.definirBase('https://cdn.exemplo.com/f/')
-teste('definirBase remove barra final', lib.urlBandeira('BR'), 'https://cdn.exemplo.com/f/br.svg')
-lib.definirBase('')
-teste('definirBase vazio volta ao padrão', lib.urlBandeira('BR'), '/bandeiras/br.svg')
-teste('obterBase', lib.obterBase(), '/bandeiras')
-
 // --- países
 teste('196 países', lib.listarPaises().length, 196)
 teste('196 códigos', lib.listarCodigos().length, 196)
 teste('obterPais BR', lib.obterPais('BR'), { nome: 'Brasil', codigo: 'BR', telefone: '55' })
+teste('obterPais minúsculo', lib.obterPais('br').codigo, 'BR')
 teste('obterPais inexistente', lib.obterPais('XX'), null)
+teste('obterPais null', lib.obterPais(null), null)
 teste('obterCodigoPais DDI', lib.obterCodigoPais('55'), 'BR')
 teste('obterCodigoPais com máscara', lib.obterCodigoPais('+55'), 'BR')
 teste('obterCodigoPais DDI inválido', lib.obterCodigoPais('9999'), null)
 teste('buscarPaises sem acento', lib.buscarPaises('africa').map((p) => p.codigo), ['ZA', 'CF'])
 teste('buscarPaises com acento', lib.buscarPaises('África').map((p) => p.codigo), ['ZA', 'CF'])
+// 'BR' casa com o ISO do Brasil e com o nome 'Brunei' — busca ampla é o esperado
+teste('buscarPaises por ISO', lib.buscarPaises('BR').map((p) => p.codigo), ['BR', 'BN'])
+teste('buscarPaises por DDI', lib.buscarPaises('55').map((p) => p.codigo).includes('BR'), true)
 teste('buscarPaises termo vazio devolve todos', lib.buscarPaises('').length, 196)
-teste('temBandeira existente', lib.temBandeira('BR'), true)
-teste('temBandeira inexistente', lib.temBandeira('XX'), false)
+teste('temPais existente', lib.temPais('BR'), true)
+teste('temPais minúsculo', lib.temPais('br'), true)
+teste('temPais inexistente', lib.temPais('XX'), false)
+teste('temPais null', lib.temPais(null), false)
 
 const lista = lib.listarPaises()
 lista[0].nome = 'ALTERADO'
 teste('listarPaises devolve cópia defensiva', lib.listarPaises()[0].nome !== 'ALTERADO', true)
 
-// --- SVG sob demanda
-teste('svgBandeira antes do cache', lib.svgBandeira('BR'), null)
-const svgBr = await lib.svgBandeiraAsync('BR')
-teste('svgBandeiraAsync devolve SVG', svgBr.startsWith('<svg'), true)
-teste('svgBandeira depois do cache', lib.svgBandeira('BR') === svgBr, true)
-teste('svgBandeiraAsync inexistente', await lib.svgBandeiraAsync('XX'), null)
+// --- svgPais sob demanda
+teste('svgPais antes do cache', lib.svgPais('BR'), null)
+teste('svgPais código inválido', lib.svgPais('XX'), null)
+teste('svgPaisAsync inexistente', await lib.svgPaisAsync('XX'), null)
+teste('svgPaisAsync null', await lib.svgPaisAsync(null), null)
 
+const svgBr = await lib.svgPaisAsync('BR')
+teste('svgPaisAsync devolve SVG', svgBr.startsWith('<svg'), true)
+teste('svgPaisAsync aplica classe', svgBr.includes('class="edusites-bandeira"'), true)
+teste('tamanho padrão é 1em', svgBr.includes('width:1em'), true)
+teste('svgPais depois do cache', lib.svgPais('BR') !== null, true)
+teste('aceita string direto', (await lib.svgPaisAsync('br')).startsWith('<svg'), true)
+
+const svg24 = await lib.svgPaisAsync({ nome: 'BR', tamanho: 24 })
+teste('tamanho numérico vira px', svg24.includes('width:24px'), true)
+
+const svgRem = await lib.svgPaisAsync({ nome: 'BR', tamanho: '1.5rem' })
+teste('tamanho string passa direto', svgRem.includes('width:1.5rem'), true)
+
+const svgRedonda = await lib.svgPaisAsync({ nome: 'BR', redonda: true })
+teste('redonda aplica border-radius', svgRedonda.includes('border-radius:50%'), true)
+teste('não-redonda não aplica border-radius', svgBr.includes('border-radius'), false)
+
+const svgClasse = await lib.svgPaisAsync({ nome: 'BR', className: 'minha-classe' })
+teste('className extra é concatenado', svgClasse.includes('class="edusites-bandeira minha-classe"'), true)
+
+// --- resolverBruto devolve o SVG sem alterações
+const bruto = await lib.resolverBruto('BR')
+teste('resolverBruto não injeta classe', bruto.includes('edusites-bandeira'), false)
+teste('resolverBruto é SVG', bruto.startsWith('<svg'), true)
+
+// --- todas as 196 carregam e são SVG válido
 const invalidos = []
 for (const codigo of lib.listarCodigos()) {
-  const svg = await lib.svgBandeiraAsync(codigo)
+  const svg = await lib.resolverBruto(codigo)
   if (!svg || !svg.startsWith('<svg') || !svg.endsWith('</svg>')) invalidos.push(codigo)
 }
 teste('as 196 bandeiras carregam e são SVG válido', invalidos, [])
+teste('precarregar devolve o total em cache', await lib.precarregar(), 196)
 
 // --- componente Vue
-const render = (props) => renderToString(createSSRApp({ render: () => h(lib.SvgBandeira, props) }))
+const render = (props) => renderToString(createSSRApp({ render: () => h(lib.SvgPais, props) }))
 
-const img = await render({ codigo: 'BR' })
-teste('componente aponta para o SVG', img.includes('/bandeiras/br.svg'), true)
-teste('componente usa loading lazy', img.includes('loading="lazy"'), true)
-teste('componente usa decoding async', img.includes('decoding="async"'), true)
-teste('componente tem alt', img.includes('alt="BR"'), true)
-teste('tamanho padrão 18px', img.includes('width:18px'), true)
+const componente = await render({ nome: 'BR' })
+teste('componente renderiza o SVG', componente.includes('<svg'), true)
+teste('componente usa span wrapper', componente.includes('edusites-pais'), true)
 
-const redonda = await render({ codigo: 'BR', tamanho: 24, redonda: true })
-teste('redonda aplica border-radius', redonda.includes('border-radius:50%'), true)
-teste('tamanho numérico vira px', redonda.includes('width:24px'), true)
+const componente24 = await render({ nome: 'BR', tamanho: 24 })
+teste('componente respeita tamanho', componente24.includes('width:24px'), true)
 
-const emRem = await render({ codigo: 'BR', tamanho: '1.5rem' })
-teste('tamanho string passa direto', emRem.includes('width:1.5rem'), true)
+const componenteRedonda = await render({ nome: 'BR', redonda: true })
+teste('componente redonda', componenteRedonda.includes('border-radius:50%'), true)
 
-const invalido = await render({ codigo: 'XX' })
-teste('código inválido não gera img', invalido.includes('<img'), false)
-
-const inline = await render({ codigo: 'BR', inline: true })
-teste('modo inline renderiza o SVG', inline.includes('<svg'), true)
+const componenteInvalido = await render({ nome: 'XX' })
+teste('código inválido não renderiza SVG', componenteInvalido.includes('<svg'), false)
 
 console.log(falhas ? `\n${falhas} de ${total} testes falharam` : `\n✓ ${total} testes passaram`)
 process.exit(falhas ? 1 : 0)

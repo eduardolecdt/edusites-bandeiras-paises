@@ -5,26 +5,28 @@ Obrigado por considerar contribuir com `@edusites/bandeiras-paises`!
 ## Estrutura
 
 ```
-flags/              196 arquivos .svg — a fonte da verdade
-src/bandeiras/      196 módulos .js — gerados a partir de flags/
-src/resolvedor.js   mapa iso → import() — gerado
-src/paises.js       lista de países — gerado/curado
+src/bandeiras/      196 módulos .js, um por bandeira (é o que permite tree-shaking)
+src/resolvedor.js   mapa iso → import() — GERADO, não edite à mão
+src/paises.js       lista de países
 src/core.js         API pública sem Vue
-src/SvgBandeira.js  componente Vue
+src/SvgPais.js      componente Vue
 src/nuxt.js         plugin Nuxt
+scripts/gerar.mjs   importa SVGs e regenera o resolvedor
+test/lib.test.mjs   suíte de testes
 ```
-
-Os arquivos em `src/bandeiras/` e `src/resolvedor.js` são **gerados**. Nunca os
-edite à mão — mexa no `.svg` correspondente e rode o gerador.
 
 ## Adicionar ou atualizar uma bandeira
 
-1. **Coloque o SVG** em `flags/{iso}.svg`:
+1. **Importe o SVG** — o script minifica e grava o módulo no lugar certo:
 
-   - Nome do arquivo = ISO-3166 alpha-2 **minúsculo** (`br.svg`, `us.svg`).
-   - Proporção 4x3, para bater com as demais.
-   - Prefira a versão mais leve disponível. Bandeiras com brasão podem passar de
-     100 KB — vale comparar `flag-icons` com `flagcdn` antes de escolher.
+   ```bash
+   node scripts/gerar.mjs caminho/para/br.svg
+   ```
+
+   O nome do arquivo precisa ser o ISO-3166 alpha-2 **minúsculo** (`br.svg`).
+   Prefira proporção 4x3, para bater com as demais, e a versão mais leve
+   disponível — bandeiras com brasão passam de 100 KB, e vale comparar
+   `flag-icons` com `flagcdn` antes de escolher.
 
 2. **Adicione o país** em `src/paises.js`, mantendo a ordem alfabética por nome
    (pt-BR):
@@ -33,29 +35,32 @@ edite à mão — mexa no `.svg` correspondente e rode o gerador.
    { nome: 'Brasil', codigo: 'BR', telefone: '55' }
    ```
 
-3. **Regenere** os módulos e o resolvedor:
+3. **Regenere e confira** a cobertura — países sem bandeira e bandeiras sem país
+   devem ser zero:
 
    ```bash
    node scripts/gerar.mjs
    ```
 
-4. **Verifique** que a cobertura continua fechando — o gerador imprime países
-   sem bandeira e bandeiras sem país. Os dois devem ser zero.
+4. **Rode os testes**:
+
+   ```bash
+   npm test
+   ```
 
 ## Regras que não devem ser quebradas
 
-- **ISO inválido devolve `''`**, nunca uma URL. Uma `<img>` quebrada na tela é
-  pior que uma bandeira ausente.
-- **Case-insensitive** na entrada — as stores usam `'BR'`, os arquivos são
-  `br.svg`.
-- **`loading="lazy"` + `decoding="async"`** por padrão no componente. Sem isso,
-  uma lista de 196 dispara 196 downloads de uma vez.
-- **Nada de módulo inline com todas as bandeiras.** O ponto do pacote é que as
-  196 fiquem fora do bundle.
+- **Uma bandeira por módulo.** Nada de juntar tudo num `bandeiras.js` — as 196
+  somam 1,7 MB e iriam inteiras para o bundle de quem usa só o Brasil.
+- **Zero configuração no consumidor.** Instalou, importou, usou. Sem copiar
+  pasta de assets, sem mexer no `nuxt.config`.
+- **Código inválido não quebra a tela** — devolve `null` (ou um `<span>` vazio
+  no componente), nunca uma imagem quebrada.
+- **Case-insensitive** na entrada — as stores usam `'BR'`, os módulos são `br`.
 
 ## Estilo de código
 
-- Português-BR nos nomes públicos (`urlBandeira`, `listarPaises`, `tamanho`).
+- Português-BR nos nomes públicos (`svgPais`, `listarPaises`, `tamanho`).
 - Sem ponto e vírgula, aspas simples — ver `.prettierrc`.
 - Zero dependências no núcleo. `vue` é peer dependency **opcional**.
 

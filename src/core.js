@@ -1,10 +1,7 @@
 import { PAISES } from './paises.js'
 import { RESOLVEDORES } from './resolvedor.js'
 
-const BASE_PADRAO = '/bandeiras'
 const CACHE = new Map()
-
-let base = BASE_PADRAO
 
 function normalizarIso(codigo) {
   const iso = String(codigo == null ? '' : codigo)
@@ -13,39 +10,43 @@ function normalizarIso(codigo) {
   return /^[a-z]{2}$/.test(iso) ? iso : ''
 }
 
-function normalizarBase(caminho) {
-  const limpo = String(caminho == null ? '' : caminho).trim()
-  if (!limpo) return ''
-  return limpo.endsWith('/') ? limpo.slice(0, -1) : limpo
+function montarSvg(svg, opcoes) {
+  const { tamanho, redonda, className } = opcoes
+
+  const dimensao = tamanho == null ? '1em' : typeof tamanho === 'number' || /^\d+$/.test(String(tamanho)) ? `${tamanho}px` : String(tamanho)
+
+  const classes = className ? `edusites-bandeira ${className}` : 'edusites-bandeira'
+  const arredondamento = redonda ? 'border-radius:50%;' : ''
+  const estilo = `width:${dimensao};height:${dimensao};${arredondamento}object-fit:cover;display:inline-block;vertical-align:middle`
+
+  return svg.replace(/^<svg/, `<svg class="${classes}" style="${estilo}" preserveAspectRatio="xMidYMid slice"`)
 }
 
-export function definirBase(caminho) {
-  base = normalizarBase(caminho) || BASE_PADRAO
-  return base
-}
+export function svgPais(opcoes) {
+  const { nome, tamanho, redonda, className } = typeof opcoes === 'string' ? { nome: opcoes } : opcoes || {}
 
-export function obterBase() {
-  return base
-}
-
-export function urlBandeira(codigo) {
-  const iso = normalizarIso(codigo)
-  if (!iso || !(iso in RESOLVEDORES)) return ''
-  return `${base}/${iso}.svg`
-}
-
-export function temBandeira(codigo) {
-  const iso = normalizarIso(codigo)
-  return Boolean(iso) && iso in RESOLVEDORES
-}
-
-export function svgBandeira(codigo) {
-  const iso = normalizarIso(codigo)
+  const iso = normalizarIso(nome)
   if (!iso) return null
-  return CACHE.get(iso) || null
+
+  const svg = CACHE.get(iso)
+  if (!svg) return null
+
+  return montarSvg(svg, { tamanho, redonda, className })
 }
 
-export async function svgBandeiraAsync(codigo) {
+export async function svgPaisAsync(opcoes) {
+  const { nome, tamanho, redonda, className } = typeof opcoes === 'string' ? { nome: opcoes } : opcoes || {}
+
+  const iso = normalizarIso(nome)
+  if (!iso) return null
+
+  const svg = await resolverBruto(iso)
+  if (!svg) return null
+
+  return montarSvg(svg, { tamanho, redonda, className })
+}
+
+export async function resolverBruto(codigo) {
   const iso = normalizarIso(codigo)
   if (!iso) return null
   if (CACHE.has(iso)) return CACHE.get(iso)
@@ -61,8 +62,13 @@ export async function svgBandeiraAsync(codigo) {
 
 export async function precarregar(codigos) {
   const lista = Array.isArray(codigos) ? codigos : Object.keys(RESOLVEDORES)
-  await Promise.all(lista.map((codigo) => svgBandeiraAsync(codigo)))
+  await Promise.all(lista.map((codigo) => resolverBruto(codigo)))
   return CACHE.size
+}
+
+export function temPais(codigo) {
+  const iso = normalizarIso(codigo)
+  return Boolean(iso) && iso in RESOLVEDORES
 }
 
 export function listarPaises() {

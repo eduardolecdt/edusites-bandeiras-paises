@@ -1,7 +1,7 @@
-import SvgBandeira from './SvgBandeira.js'
+import SvgPais from './SvgPais.js'
 
-export function instalarBandeiras(nuxtApp) {
-  nuxtApp.vueApp.component('SvgBandeira', SvgBandeira)
+export function instalarPaises(nuxtApp) {
+  nuxtApp.vueApp.component('SvgPais', SvgPais)
 }
 
-export default instalarBandeiras
+export default instalarPaises

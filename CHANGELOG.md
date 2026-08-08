@@ -10,33 +10,33 @@ Primeira versão.
 
 ### Adicionado
 
-- **196 bandeiras em SVG** (`flags/{iso}.svg`), ISO-3166 alpha-2 minúsculo,
-  proporção 4x3. Origem: `flag-icons` v7.2.3, com Sérvia, Dominica e Irã
-  substituídas pela versão do `flagcdn` (bem menores: 177→28 KB, 14→4 KB,
-  13→1 KB).
-- **Lista de 196 países** em `src/paises.js` — `{ nome, codigo, telefone }`,
-  nomes em português-BR, ordenada por nome. Cobertura verificada: 196/196
-  países com bandeira, nenhuma bandeira órfã.
-- **`urlBandeira(codigo)`** — caminho do SVG, case-insensitive. Devolve `''`
-  para ISO inválido ou inexistente, então nunca gera uma `<img>` quebrada.
-- **`definirBase(caminho)` / `obterBase()`** — permite servir as bandeiras em
-  outro caminho ou num CDN (padrão `/bandeiras`).
-- **Modo inline** — `svgBandeiraAsync(codigo)` carrega o SVG como módulo JS sob
-  demanda, com cache. `svgBandeira()` para leitura síncrona do cache e
-  `precarregar()` para aquecer.
-- **Componente Vue `SvgBandeira`** — props `codigo`, `tamanho`, `redonda`,
-  `inline`, `alt`, `className`. Em modo `<img>` sai com `loading="lazy"` e
-  `decoding="async"` por padrão; código inexistente vira um `<span>` vazio do
-  tamanho certo.
-- **Plugin Nuxt** — `instalarBandeiras(nuxtApp)` via
+- **196 bandeiras em SVG**, ISO-3166 alpha-2, proporção 4x3. Origem:
+  `flag-icons` v7.2.3, com Sérvia, Dominica e Irã substituídas pela versão do
+  `flagcdn` (bem menores: 177→28 KB, 14→4 KB, 13→1 KB).
+- **Componente Vue `SvgPais`** — `<SvgPais nome="BR" />`. Props `nome`,
+  `tamanho`, `redonda` e `className`. Sem `tamanho`, herda `1em` da fonte, como
+  um ícone. Código inexistente vira um `<span>` vazio do tamanho certo, nunca
+  uma imagem quebrada.
+- **Plugin Nuxt** — `instalarPaises(nuxtApp)` via
   `@edusites/bandeiras-paises/nuxt` registra o componente globalmente.
-- **Helpers de país** — `obterPais`, `obterCodigoPais` (aceita DDI com máscara),
-  `buscarPaises` (nome sem acento, ISO ou DDI), `listarCodigos`, `temBandeira`.
-- **Subpath exports** — `/core`, `/paises`, `/nuxt` e `/flags/*`.
+- **`svgPaisAsync(opcoes)`** para JS puro, React e Svelte; `svgPais()` para
+  leitura síncrona do cache; `resolverBruto()` para o SVG sem estilo injetado;
+  `precarregar()` para aquecer.
+- **Lista de 196 países** — `{ nome, codigo, telefone }`, nomes em
+  português-BR, ordenada por nome. Cobertura verificada: 196/196 países com
+  bandeira, nenhuma bandeira órfã.
+- **Helpers de país** — `obterPais`, `obterCodigoPais` (aceita DDI com
+  máscara), `buscarPaises` (nome sem acento, ISO ou DDI), `listarCodigos`,
+  `temPais`.
+- **Subpath exports** — `/core` (sem Vue), `/paises` e `/nuxt`.
+- **42 testes** cobrindo a API e o componente via SSR.
 
 ### Decisões de projeto
 
-- As bandeiras **não são inline num único módulo**. Um `icones.js` com as 196
-  pesaria ~1.7 MB e o bundler o incluiria inteiro mesmo para quem usa só o
-  Brasil. Cada bandeira é um arquivo (`flags/`) e um módulo próprio
-  (`src/bandeiras/`), então nada entra no bundle sem ser pedido.
+- **Tree-shaking por bandeira.** Cada uma é um módulo próprio em
+  `src/bandeiras/{iso}.js`, carregado por `import()` sob demanda. As 196 somam
+  1,7 MB — num módulo único o bundler incluiria tudo mesmo para quem usa só o
+  Brasil.
+- **Nada de configuração no projeto consumidor.** Instalou, importou, usou —
+  o mesmo contrato do `@edusites/icons`. Sem copiar pasta de assets, sem
+  `publicAssets` no Nitro, sem servir arquivo estático.

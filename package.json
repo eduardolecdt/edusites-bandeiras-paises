@@ -1,7 +1,7 @@
 {
   "name": "@edusites/bandeiras-paises",
   "version": "1.0.0",
-  "description": "Biblioteca JavaScript com as bandeiras dos 196 países em SVG (ISO-3166 alpha-2), lista de países em português com DDI e componente Vue pronto. Arquivos fora do bundle, carregados sob demanda. Nuxt, Vue e JS puro.",
+  "description": "Biblioteca JavaScript com as bandeiras dos 196 países em SVG (ISO-3166 alpha-2) e a lista de países em português com DDI. Tree-shakeable: cada bandeira é um chunk próprio, carregado sob demanda. React, Vue, Nuxt, Svelte e JS puro.",
   "author": {
     "name": "Eduardo Sites",
     "email": "edusites@lecdt.com",
@@ -46,7 +46,6 @@
     "./nuxt": "./src/nuxt.js",
     "./core": "./src/core.js",
     "./paises": "./src/paises.js",
-    "./flags/*": "./flags/*",
     "./package.json": "./package.json"
   },
   "files": [
@@ -55,9 +54,8 @@
     "src/paises.js",
     "src/resolvedor.js",
     "src/bandeiras",
-    "src/SvgBandeira.js",
+    "src/SvgPais.js",
     "src/nuxt.js",
-    "flags",
     "README.md",
     "CHANGELOG.md",
     "LICENSE"
