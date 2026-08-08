@@ -1,0 +1,83 @@
+{
+  "name": "@edusites/bandeiras-paises",
+  "version": "1.0.0",
+  "description": "Biblioteca JavaScript com as bandeiras dos 196 países em SVG (ISO-3166 alpha-2), lista de países em português com DDI e componente Vue pronto. Arquivos fora do bundle, carregados sob demanda. Nuxt, Vue e JS puro.",
+  "author": {
+    "name": "Eduardo Sites",
+    "email": "edusites@lecdt.com",
+    "url": "https://lecdt.com"
+  },
+  "license": "MIT",
+  "homepage": "https://lecdt.com/libs/bandeiras-paises",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eduardolecdt/edusites-bandeiras-paises.git"
+  },
+  "bugs": {
+    "url": "https://github.com/eduardolecdt/edusites-bandeiras-paises/issues"
+  },
+  "keywords": [
+    "javascript",
+    "bandeiras",
+    "paises",
+    "flags",
+    "countries",
+    "svg",
+    "icons",
+    "iso-3166",
+    "ddi",
+    "telefone",
+    "edusites",
+    "lecdt",
+    "nuxt",
+    "vue",
+    "ui"
+  ],
+  "scripts": {
+    "gerar": "node scripts/gerar.mjs",
+    "test": "node test/lib.test.mjs"
+  },
+  "main": "./src/index.js",
+  "module": "./src/index.js",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.js",
+    "./nuxt": "./src/nuxt.js",
+    "./core": "./src/core.js",
+    "./paises": "./src/paises.js",
+    "./flags/*": "./flags/*",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "src/index.js",
+    "src/core.js",
+    "src/paises.js",
+    "src/resolvedor.js",
+    "src/bandeiras",
+    "src/SvgBandeira.js",
+    "src/nuxt.js",
+    "flags",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "peerDependencies": {
+    "vue": ">=3.0.0"
+  },
+  "peerDependenciesMeta": {
+    "vue": {
+      "optional": true
+    }
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "@vue/server-renderer": "^3.5.41",
+    "vue": "^3.5.41"
+  }
+}
